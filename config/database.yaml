@@ -1,0 +1,8 @@
+# If you want to use your Docker host's database server use either
+# Host: "host.docker.internal"
+# or
+# Host: "172.17.0.1"
+Username: "michael"
+Password: "secret"
+Database: "shenanigans"
+Port: 5432
