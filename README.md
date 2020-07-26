@@ -18,7 +18,9 @@ Routing examples can be found within the `/routes` directory.
 ## Database
 
 Please, please stop using ORM. Go with [pgx](https://github.com/jackc/pgx), or just plain old database/sql ain't that hard.
+
 Hell, [here's a powerful SQL string builder](https://github.com/masterminds/squirrel) if you don't like building your string by yourself,
+
 and there's plenty of migration libraries out there for Go. [Here's an example](https://github.com/steinbacher/goose).
 
 ## JSON Marshal and Unmarshal
