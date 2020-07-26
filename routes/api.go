@@ -8,7 +8,6 @@ import (
 
 // RegisterAPI Register All API Routes.
 func RegisterAPI(api fiber.Router) {
-	// registerRoles(api)
 	registerUsers(api)
 }
 

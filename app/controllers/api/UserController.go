@@ -21,6 +21,10 @@ type responseStruct struct {
 	Data    []userData
 }
 
+type requestBodyStruct struct {
+	Name string `json:"name" xml:"name" form:"name"`
+}
+
 // GetAllUsers : Respond all users as JSON
 func GetAllUsers(c *fiber.Ctx) {
 
@@ -32,9 +36,9 @@ func GetAllUsers(c *fiber.Ctx) {
 
 	// not exactly the db instance, it's the pool instance
 	// but for all intents and purposes works exactly like db connection
-	// here we query all rows from the query
+	// here we query all rows from the query string and sort them by user id
 	db := database.Instance()
-	rows, err := db.Query(c.Context(), "SELECT * FROM users")
+	rows, err := db.Query(c.Context(), "SELECT * FROM users ORDER BY user_id ASC")
 
 	// pool error handling
 	if err != nil {
@@ -56,7 +60,7 @@ func GetAllUsers(c *fiber.Ctx) {
 		Message: "Here is all the users we have",
 		Data:    dataSlice,
 	}
-	// create the user data holder struct, to describe how i would like the json to be like
+	// create the user data holder struct, to describe how i would like the json data insides to be like
 	ud := userData{
 		UserId: 0,
 		Name:   "",
@@ -128,7 +132,7 @@ func GetUser(c *fiber.Ctx) {
 		Message: "Here is all the users we have",
 		Data:    dataSlice,
 	}
-	// create the user data holder struct, to describe how i would like the json to be like
+	// create the user data holder struct, to describe how i would like the json data insides to be like
 	ud := userData{
 		UserId: 0,
 		Name:   "",
@@ -165,94 +169,163 @@ func GetUser(c *fiber.Ctx) {
 	c.Send(output)
 }
 
-// AddUser Add a single user to the database
+// AddUser : Add a single user to the database
 func AddUser(c *fiber.Ctx) {
-	// db := database.Instance()
-	// User := new(models.User)
-	// if err := c.BodyParser(User); err != nil {
-	// 	c.Send("An error occurred when parsing the new user", err)
-	// }
-	// if res := db.Create(&User); res.Error != nil {
-	// 	c.Send("An error occurred when storing the new user", res.Error)
-	// }
-	// // Match role to user
-	// if User.RoleID != 0 {
-	// 	Role := new(models.Role)
-	// 	if res := db.Find(&Role, User.RoleID); res.Error != nil {
-	// 		c.Send("An error occurred when retrieving the role", res.Error)
-	// 	}
-	// 	if Role.ID != 0 {
-	// 		User.Role = *Role
-	// 	}
-	// }
-	err := c.JSON("b")
-	if err != nil {
-		panic("Error occurred when returning JSON of a user")
+	rbod := new(requestBodyStruct)
+
+	// parse the body and pass values to the struct
+	if err := c.BodyParser(rbod); err != nil {
+		panic(fmt.Sprintf("error parsing body in create new user: %s", err))
 	}
+
+	// this is the slice to hold "data:[]" part of the response
+	dataSlice := make([]userData, 0, 1)
+
+	// my standard struct for a response
+	rs := responseStruct{
+		Success: true,
+		Status:  201,
+		Message: "Here is all the users we have",
+		Data:    dataSlice,
+	}
+	// create the user data holder struct, to describe how i would like the json data insides to be like
+	ud := userData{
+		UserId: 0,
+		Name:   "",
+	}
+
+	// not exactly the db instance, it's the pool instance
+	// but for all intents and purposes works exactly like db connection
+	// here we execute the insert
+	db := database.Instance()
+	if _, err := db.Exec(c.Context(), "INSERT INTO users(name) VALUES($1)", rbod.Name); err != nil {
+		panic(fmt.Sprintf("error inserting new user into database: %s", err))
+	}
+
+	// query the new user to double check
+	if err := db.QueryRow(c.Context(), "SELECT * FROM users WHERE name=$1", rbod.Name).Scan(&ud.UserId, &ud.Name); err != nil {
+		panic(fmt.Sprintf("error in getting the new user from database: %s", err))
+	}
+
+	// append the user data to the slice
+	dataSlice = append(dataSlice, ud)
+
+	// set the status, and header of content-type
+	// also set the response message and data
+	c.Status(rs.Status)
+	c.Type("json")
+	rs.Message, rs.Data = "Here is the new user", dataSlice
+
+	// naming strategy for jsoniter so we don't have to add json tags individually
+	extra.SetNamingStrategy(extra.LowerCaseWithUnderscores)
+
+	output, errJ := jsoniter.Marshal(rs)
+	if errJ != nil {
+		panic(fmt.Sprintf("Error converting the new user to json: %s", errJ))
+	}
+
+	c.Send(output)
 }
 
-// EditUser Edit a single user
+// EditUser : Edit a single user
 func EditUser(c *fiber.Ctx) {
-	// db := database.Instance()
-	// id := c.Params("id")
-	// EditUser := new(models.User)
-	// User := new(models.User)
-	// if err := c.BodyParser(EditUser); err != nil {
-	// 	c.Send("An error occurred when parsing the edited user", err)
-	// }
-	// if res := db.Find(&User, id); res.Error != nil {
-	// 	c.Send("An error occurred when retrieving the existing user", res.Error)
-	// }
-	// User does not exist
-	// if User.ID == 0 {
-	// 	c.SendStatus(404)
-	// 	err := c.JSON(fiber.Map{
-	// 		"ID": id,
-	// 	})
-	// 	if err != nil {
-	// 		panic("Error occurred when returning JSON of a user")
-	// 	}
-	// 	return
-	// }
-	// User.Name = EditUser.Name
-	// User.Email = EditUser.Email
-	// User.RoleID = EditUser.RoleID
-	// Match role to user
-	// if User.RoleID != 0 {
-	// 	Role := new(models.Role)
-	// 	if res := db.Find(&Role, User.RoleID); res.Error != nil {
-	// 		c.Send("An error occurred when retrieving the role", res.Error)
-	// 	}
-	// 	if Role.ID != 0 {
-	// 		User.Role = *Role
-	// 	}
-	// }
-	// // Save user
-	// db.Save(&User)
+	rbod := new(requestBodyStruct)
 
-	err := c.JSON("c")
-	if err != nil {
-		panic("Error occurred when returning JSON of a user")
+	// parse the body and pass values to the struct
+	if err := c.BodyParser(rbod); err != nil {
+		panic(fmt.Sprintf("error parsing body in edit user: %s", err))
 	}
+
+	// this is the slice to hold "data:[]" part of the response
+	dataSlice := make([]userData, 0, 1)
+
+	// my standard struct for a response
+	rs := responseStruct{
+		Success: true,
+		Status:  200,
+		Message: "Here is all the users we have",
+		Data:    dataSlice,
+	}
+	// create the user data holder struct, to describe how i would like the json data insides to be like
+	ud := userData{
+		UserId: 0,
+		Name:   "",
+	}
+
+	// get the request parameter of user id
+	queryID := c.Params("id")
+
+	// not exactly the db instance, it's the pool instance
+	// but for all intents and purposes works exactly like db connection
+	// here we execute the update
+	db := database.Instance()
+	if _, err := db.Exec(c.Context(), "UPDATE users SET name=$1 WHERE user_id=$2", rbod.Name, queryID); err != nil {
+		panic(fmt.Sprintf("error updating specified user into database: %s", err))
+	}
+
+	// query the updated user to double check
+	if err := db.QueryRow(c.Context(), "SELECT * FROM users WHERE user_id=$1", queryID).Scan(&ud.UserId, &ud.Name); err != nil {
+		panic(fmt.Sprintf("error in getting the updated user from database: %s", err))
+	}
+
+	// append the user data to the slice
+	dataSlice = append(dataSlice, ud)
+
+	// set the status, and header of content-type
+	// also set the response message and data
+	c.Status(rs.Status)
+	c.Type("json")
+	rs.Message, rs.Data = "Here is the updated user", dataSlice
+
+	// naming strategy for jsoniter so we don't have to add json tags individually
+	extra.SetNamingStrategy(extra.LowerCaseWithUnderscores)
+
+	output, errJ := jsoniter.Marshal(rs)
+	if errJ != nil {
+		panic(fmt.Sprintf("Error converting the updated user to json: %s", errJ))
+	}
+
+	c.Send(output)
 }
 
-// DeleteUser Delete a single user
+// DeleteUser : Delete a single user
 func DeleteUser(c *fiber.Ctx) {
-	// id := c.Params("id")
-	// db := database.Instance()
 
-	// var User models.User
-	// db.Find(&User, id)
-	// if res := db.Find(&User); res.Error != nil {
-	// 	c.Send("An error occurred when finding the user to be deleted", res.Error)
-	// }
-	// db.Delete(&User)
+	// this is the slice to hold "data:[]" part of the response
+	dataSlice := make([]userData, 0, 1)
 
-	err := c.JSON(fiber.Map{
-		"ID":      1,
-		"Deleted": true,
-	})
-	if err != nil {
-		panic("Error occurred when returning JSON of a user")
+	// my standard struct for a response
+	rs := responseStruct{
+		Success: true,
+		Status:  202,
+		Message: "Here is all the users we have",
+		Data:    dataSlice,
 	}
+
+	// get the request parameter of user id
+	queryID := c.Params("id")
+
+	// not exactly the db instance, it's the pool instance
+	// but for all intents and purposes works exactly like db connection
+	// here we execute the update
+	db := database.Instance()
+	if _, err := db.Exec(c.Context(), "DELETE FROM users WHERE user_id=$1", queryID); err != nil {
+		panic(fmt.Sprintf("error deleting specified user into database: %s", err))
+	}
+
+	// set the status, and header of content-type
+	// also set the response message and data
+	c.Status(rs.Status)
+	c.Type("json")
+	rs.Message = fmt.Sprintf("User %s successfuly deleted.", queryID)
+
+	// naming strategy for jsoniter so we don't have to add json tags individually
+	extra.SetNamingStrategy(extra.LowerCaseWithUnderscores)
+
+	output, errJ := jsoniter.Marshal(rs)
+	if errJ != nil {
+		panic(fmt.Sprintf("Error converting the deleted user to json: %s", errJ))
+	}
+
+	c.Send(output)
 }
