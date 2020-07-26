@@ -29,10 +29,6 @@ Fiber already uses [jsoniter](https://github.com/json-iterator/go) by default. I
 
 Example controllers can be found within the `/app/controllers` directory. You can extend or edit these to your preferences.
 
-## Models
-
-Models are located within the `/app/models` directory.
-
 ## Providers
 
 Providers (custom middleware) can be found at `/app/providers`. These providers are not automatically registered.
