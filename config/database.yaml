@@ -2,7 +2,7 @@
 # Host: "host.docker.internal"
 # or
 # Host: "172.17.0.1"
-Username: "michael"
+Username: "postgres"
 Password: "secret"
-Database: "shenanigans"
+Database: "fiber"
 Port: 5432

@@ -7,12 +7,12 @@ import (
 )
 
 // RegisterAPI Register All API Routes.
-func RegisterAPI(api *fiber.Group) {
+func RegisterAPI(api fiber.Router) {
 	// registerRoles(api)
 	registerUsers(api)
 }
 
-func registerUsers(api *fiber.Group) {
+func registerUsers(api fiber.Router) {
 	users := api.Group("/users")
 
 	users.Get("/", Controller.GetAllUsers)
