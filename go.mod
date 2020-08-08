@@ -22,7 +22,7 @@ require (
 	github.com/spf13/viper v1.7.1
 	github.com/thomasvvugt/fiber-hashing v0.0.0-20200511145001-a62bb48860d5
 	golang.org/x/crypto v0.0.0-20200728195943-123391ffb6de // indirect
-	golang.org/x/sys v0.0.0-20200805065543-0cf7623e9dbd // indirect
+	golang.org/x/sys v0.0.0-20200806125547-5acd03effb82 // indirect
 	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1 // indirect
 	gopkg.in/ini.v1 v1.57.0 // indirect
 )
