@@ -1,11 +1,11 @@
 package configuration
 
 import (
-	"github.com/gofiber/fiber/middleware"
+	"github.com/gofiber/fiber/v2/middleware/compress"
 	"github.com/spf13/viper"
 )
 
-func loadCompressionConfiguration() (enabled bool, config middleware.CompressConfig, err error) {
+func loadCompressionConfiguration() (enabled bool, config compress.Config, err error) {
 	// Set a new configuration provider
 	provider := viper.New()
 
@@ -37,5 +37,5 @@ func loadCompressionConfiguration() (enabled bool, config middleware.CompressCon
 // Set default configuration for the Logger Middleware
 func setDefaultCompressionConfiguration(provider *viper.Viper) {
 	provider.SetDefault("Enabled", true)
-	provider.SetDefault("Level", 0)
+	provider.SetDefault("Level", compress.LevelBestSpeed)
 }

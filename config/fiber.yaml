@@ -1,5 +1,5 @@
-Prefork: true
-ServerHeader: "fiber"
+Prefork: false
+ServerHeader: "fiber v2"
 ETag: true
 ReadTimeout: "120s"
 WriteTimeout: "120s"

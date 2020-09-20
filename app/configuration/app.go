@@ -4,10 +4,11 @@ import (
 	"github.com/spf13/viper"
 )
 
+// ApplicationConfiguration struct to handle application config.
 type ApplicationConfiguration struct {
-	Listen interface{}
+	Listen      string
 	SuppressWWW bool
-	ForceHTTPS bool
+	ForceHTTPS  bool
 }
 
 func loadApplicationConfiguration() (ApplicationConfiguration, error) {

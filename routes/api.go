@@ -3,8 +3,10 @@ package routes
 import (
 	Controller "github.com/mikeychowy/fiber-crayplate/app/controllers/api"
 
-	"github.com/gofiber/fiber"
+	"github.com/gofiber/fiber/v2"
 )
+
+// const timeoutTick = 60 * time.Second
 
 // RegisterAPI Register All API Routes.
 func RegisterAPI(api fiber.Router) {

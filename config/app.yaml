@@ -1,3 +1,4 @@
-Listen: 3000
+# use only with colon(:) in front of port address or fiber will complain about it
+Listen: ":8080"
 SuppressWWW: true
-ForceHTTPS: false
+ForceHTTPS: true

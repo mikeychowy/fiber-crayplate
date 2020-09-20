@@ -3,7 +3,7 @@ package api
 import (
 	"fmt"
 
-	"github.com/gofiber/fiber"
+	"github.com/gofiber/fiber/v2"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/json-iterator/go/extra"
 	"github.com/mikeychowy/fiber-crayplate/database"
@@ -26,7 +26,7 @@ type requestBodyStruct struct {
 }
 
 // GetAllUsers : Respond all users as JSON
-func GetAllUsers(c *fiber.Ctx) {
+func GetAllUsers(c *fiber.Ctx) error {
 
 	// naming strategy for jsoniter so we don't have to add json tags individually
 	extra.SetNamingStrategy(extra.LowerCaseWithUnderscores)
@@ -38,7 +38,7 @@ func GetAllUsers(c *fiber.Ctx) {
 	// but for all intents and purposes works exactly like db connection
 	// here we query all rows from the query string and sort them by user id
 	db := database.Instance()
-	rows, err := db.Query(c.Context(), "SELECT * FROM users ORDER BY user_id ASC")
+	rows, err := db.Query(c.Context(), "SELECT user_id, name FROM users ORDER BY user_id ASC")
 
 	// pool error handling
 	if err != nil {
@@ -100,24 +100,24 @@ func GetAllUsers(c *fiber.Ctx) {
 		if errJ != nil {
 			panic(fmt.Sprintf("Error converting all users to json: %s", errJ))
 		}
-		c.Send(output)
-	} else {
-		// success is here
-
-		rs.Success, rs.Status, rs.Message, rs.Data = true, 200, "Here are all the users", dataSlice
-		c.Status(rs.Status)
-
-		// marshal response struct to json
-		output, errJ := jsoniter.Marshal(rs)
-		if errJ != nil {
-			panic(fmt.Sprintf("Error converting all users to json: %s", errJ))
-		}
-		c.Send(output)
+		return c.Send(output)
 	}
+	// success is here
+
+	rs.Success, rs.Status, rs.Message, rs.Data = true, 200, "Here are all the users", dataSlice
+	c.Status(rs.Status)
+
+	// marshal response struct to json
+	output, errJ := jsoniter.Marshal(rs)
+	if errJ != nil {
+		panic(fmt.Sprintf("Error converting all users to json: %s", errJ))
+	}
+	strOut := string(output)
+	return c.SendString(strOut)
 }
 
 // GetUser : Respond a single user by id as JSON
-func GetUser(c *fiber.Ctx) {
+func GetUser(c *fiber.Ctx) error {
 
 	// naming strategy for jsoniter so we don't have to add json tags individually
 	extra.SetNamingStrategy(extra.LowerCaseWithUnderscores)
@@ -145,7 +145,7 @@ func GetUser(c *fiber.Ctx) {
 	// but for all intents and purposes works exactly like db connection
 	// here we query a row from the query
 	db := database.Instance()
-	err := db.QueryRow(c.Context(), "SELECT * FROM users WHERE user_id=$1", queryID).Scan(&ud.UserId, &ud.Name)
+	err := db.QueryRow(c.Context(), "SELECT user_id, name FROM users WHERE user_id=$1", queryID).Scan(&ud.UserId, &ud.Name)
 
 	// scanner error handling
 	if err != nil {
@@ -166,11 +166,11 @@ func GetUser(c *fiber.Ctx) {
 		panic(fmt.Sprintf("Error converting the specified user to json: %s", errJ))
 	}
 
-	c.Send(output)
+	return c.Send(output)
 }
 
 // AddUser : Add a single user to the database
-func AddUser(c *fiber.Ctx) {
+func AddUser(c *fiber.Ctx) error {
 	rbod := new(requestBodyStruct)
 
 	// parse the body and pass values to the struct
@@ -203,7 +203,7 @@ func AddUser(c *fiber.Ctx) {
 	}
 
 	// query the new user to double check
-	if err := db.QueryRow(c.Context(), "SELECT * FROM users WHERE name=$1", rbod.Name).Scan(&ud.UserId, &ud.Name); err != nil {
+	if err := db.QueryRow(c.Context(), "SELECT user_id, name FROM users WHERE name=$1", rbod.Name).Scan(&ud.UserId, &ud.Name); err != nil {
 		panic(fmt.Sprintf("error in getting the new user from database: %s", err))
 	}
 
@@ -224,11 +224,11 @@ func AddUser(c *fiber.Ctx) {
 		panic(fmt.Sprintf("Error converting the new user to json: %s", errJ))
 	}
 
-	c.Send(output)
+	return c.Send(output)
 }
 
 // EditUser : Edit a single user
-func EditUser(c *fiber.Ctx) {
+func EditUser(c *fiber.Ctx) error {
 	rbod := new(requestBodyStruct)
 
 	// parse the body and pass values to the struct
@@ -264,7 +264,7 @@ func EditUser(c *fiber.Ctx) {
 	}
 
 	// query the updated user to double check
-	if err := db.QueryRow(c.Context(), "SELECT * FROM users WHERE user_id=$1", queryID).Scan(&ud.UserId, &ud.Name); err != nil {
+	if err := db.QueryRow(c.Context(), "SELECT user_id, name FROM users WHERE user_id=$1", queryID).Scan(&ud.UserId, &ud.Name); err != nil {
 		panic(fmt.Sprintf("error in getting the updated user from database: %s", err))
 	}
 
@@ -285,11 +285,11 @@ func EditUser(c *fiber.Ctx) {
 		panic(fmt.Sprintf("Error converting the updated user to json: %s", errJ))
 	}
 
-	c.Send(output)
+	return c.Send(output)
 }
 
 // DeleteUser : Delete a single user
-func DeleteUser(c *fiber.Ctx) {
+func DeleteUser(c *fiber.Ctx) error {
 
 	// this is the slice to hold "data:[]" part of the response
 	dataSlice := make([]userData, 0, 1)
@@ -327,5 +327,5 @@ func DeleteUser(c *fiber.Ctx) {
 		panic(fmt.Sprintf("Error converting the deleted user to json: %s", errJ))
 	}
 
-	c.Send(output)
+	return c.Send(output)
 }

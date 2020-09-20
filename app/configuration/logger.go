@@ -3,11 +3,11 @@ package configuration
 import (
 	"os"
 
-	"github.com/gofiber/fiber/middleware"
+	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/spf13/viper"
 )
 
-func loadLoggerConfiguration() (enabled bool, config middleware.LoggerConfig, err error) {
+func loadLoggerConfiguration() (enabled bool, config logger.Config, err error) {
 	// Set a new configuration provider
 	provider := viper.New()
 
@@ -29,7 +29,7 @@ func loadLoggerConfiguration() (enabled bool, config middleware.LoggerConfig, er
 		}
 	}
 
-	// Unmarshal the configuration file into middleware.LoggerConfig
+	// Unmarshal the configuration file into logger.Config
 	err = provider.Unmarshal(&config)
 
 	// Return the configuration (and error if occurred)
@@ -41,5 +41,6 @@ func setDefaultLoggerConfiguration(provider *viper.Viper) {
 	provider.SetDefault("Enabled", true)
 	provider.SetDefault("Format", "${time} ${method} ${path} - ${ip} - ${status} - ${latency} - ${error}\n")
 	provider.SetDefault("TimeFormat", "15:04:05")
+	provider.SetDefault("TimeZone", "Local")
 	provider.SetDefault("Output", os.Stderr)
 }

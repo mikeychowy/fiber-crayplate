@@ -46,7 +46,7 @@ func setDefaultDatabaseConfiguration(provider *viper.Viper) {
 	provider.SetDefault("Enabled", true)
 	provider.SetDefault("Host", "127.0.0.1")
 	provider.SetDefault("Port", "5432")
-	provider.SetDefault("Username", "fiber")
+	provider.SetDefault("Username", "postgres")
 	provider.SetDefault("Password", "secret")
 	provider.SetDefault("Database", "fiber")
 }

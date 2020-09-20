@@ -1,22 +1,23 @@
 package configuration
 
 import (
-	"github.com/gofiber/cors"
-	"github.com/gofiber/fiber"
-	"github.com/gofiber/fiber/middleware"
-	"github.com/gofiber/helmet"
+	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/compress"
+	"github.com/gofiber/fiber/v2/middleware/cors"
+	"github.com/gofiber/fiber/v2/middleware/logger"
+	"github.com/gofiber/helmet/v2"
 
 	hashing "github.com/thomasvvugt/fiber-hashing"
 )
 
 // Configuration struct of each config type
 type Configuration struct {
-	Fiber          fiber.Settings
+	Fiber          fiber.Config
 	App            ApplicationConfiguration
 	Enabled        map[string]bool
-	Logger         middleware.LoggerConfig
+	Logger         logger.Config
 	TemplateEngine func(raw string, bind interface{}) (out string, err error)
-	Compression    middleware.CompressConfig
+	Compression    compress.Config
 	CORS           cors.Config
 	Helmet         helmet.Config
 	Hash           hashing.Config
@@ -26,7 +27,7 @@ type Configuration struct {
 	Database       DatabaseConfiguration
 }
 
-// LoadConfigurations all using viper
+// LoadConfigurations using viper
 func LoadConfigurations() (config Configuration, err error) {
 	config.Enabled = make(map[string]bool)
 	// Load the Fiber application configuration

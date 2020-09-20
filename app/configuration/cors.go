@@ -1,7 +1,7 @@
 package configuration
 
 import (
-	"github.com/gofiber/cors"
+	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/spf13/viper"
 )
 
@@ -37,9 +37,10 @@ func loadCORSConfiguration() (enabled bool, config cors.Config, err error) {
 // Set default configuration for the Logger Middleware
 func setDefaultCORSConfiguration(provider *viper.Viper) {
 	provider.SetDefault("Enabled", true)
-	provider.SetDefault("AllowOrigins", []string{"*"})
-	provider.SetDefault("AllowMethods", []string{"GET", "POST", "HEAD", "PUT", "DELETE", "PATCH"})
-	provider.SetDefault("AllowCredentials", nil)
-	provider.SetDefault("ExposeHeaders", nil)
+	provider.SetDefault("AllowOrigins", "*")
+	provider.SetDefault("AllowMethods", "GET,POST,HEAD,PUT,DELETE,PATCH")
+	provider.SetDefault("AllowHeaders", "")
+	provider.SetDefault("AllowCredentials", false)
+	provider.SetDefault("ExposeHeaders", "")
 	provider.SetDefault("MaxAge", 0)
 }

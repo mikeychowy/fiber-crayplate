@@ -3,11 +3,11 @@ package providers
 import (
 	"strings"
 
-	"github.com/gofiber/fiber"
+	"github.com/gofiber/fiber/v2"
 )
 
-// Suppress the `www.` at the beginning of URLs
-func SuppressWWW(c *fiber.Ctx)  {
+// SuppressWWW suppresses the `www.` at the beginning of URLs
+func SuppressWWW(c *fiber.Ctx) error {
 	hostnameSplit := strings.Split(c.Hostname(), ".")
 	if hostnameSplit[0] == "www" && len(hostnameSplit) > 1 {
 		newHostname := ""
@@ -18,6 +18,7 @@ func SuppressWWW(c *fiber.Ctx)  {
 				newHostname = newHostname + hostnameSplit[i]
 			}
 		}
-		c.Redirect(c.Protocol() + "://" + newHostname + c.OriginalURL(), 301)
+		return c.Redirect(c.Protocol()+"://"+newHostname+c.OriginalURL(), 301)
 	}
+	return nil
 }
